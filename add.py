@@ -61,7 +61,7 @@ def parse_event_datetime(date_str, time_str):
         return None
 
 def gather_info():
-    text = input("Enter a date, time and description for your event")
+    text = input("Enter a date, time and description for your event: ")
     check_exit(text)
     doc = nlp(text)
     
