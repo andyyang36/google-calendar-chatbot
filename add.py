@@ -5,6 +5,7 @@ import datetime as dt
 
 nlp = spacy.load("en_core_web_sm")
 
+
 def check_exit(input_text):
     if input_text.upper() in ("EXIT", "CANCEL"):
         sys.exit()
@@ -60,7 +61,7 @@ def parse_event_datetime(date_str, time_str):
         return None
 
 def gather_info():
-    text = input("Enter a date and a time for your event OR type 'EXIT' at any time to exit: ")
+    text = input("Enter a date, time and description for your event")
     check_exit(text)
     doc = nlp(text)
     
@@ -88,8 +89,7 @@ def gather_info():
         print("Error parsing date and time.")
         return None
 
-    event_name = input("Description of your event: ")
-    check_exit(event_name)
+    event_name = " ".join([token.text for token in doc if token.ent_type_ not in ("TIME", "DATE")])
 
     while True:
         event_length_str = input("How long is your event? (Enter in minutes): ")
@@ -105,6 +105,8 @@ def gather_info():
 
     end_dt = start_dt + dt.timedelta(minutes=event_length)
     print(f"You have successfully scheduled '{event_name}' on {event_date} at {event_time} for {event_length} minutes.")
+
+
 
     return {
         'summary': event_name,
