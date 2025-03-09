@@ -1,18 +1,16 @@
-"""ADD FEATURE FOR PYTHON CHATBOT"""
-
 import spacy
 import sys
-from dateutil import parser  # used to parse dates and times
+from dateutil import parser, tz
+import datetime as dt
 
 nlp = spacy.load("en_core_web_sm")
 
 def check_exit(input_text):
     if input_text.upper() in ("EXIT", "CANCEL"):
-        return True
+        sys.exit()
     return False
 
 def is_valid_time(time_text):
-
     time_doc = nlp(time_text)
     for ent in time_doc.ents:
         if ent.label_ == "TIME":
@@ -27,7 +25,6 @@ def is_valid_date(date_text):
     return False
 
 def get_date_from_user():
-
     while True: 
         date = input("Please enter a date (Example: March 9 2025): ")
         check_exit(date)
@@ -55,21 +52,23 @@ def parse_event_datetime(date_str, time_str):
     combined = f"{date_str} {time_str}"
     try:
         dt_obj = parser.parse(combined)
-        return dt_obj.isoformat()
+        local_tz = tz.gettz()
+        dt_obj = dt_obj.replace(tzinfo=local_tz)
+        return dt_obj  
     except ValueError:
         print("Could not parse the date and time. Please check your input.")
         return None
 
 def gather_info():
-
     text = input("Enter a date and a time for your event OR type 'EXIT' at any time to exit: ")
     check_exit(text)
     doc = nlp(text)
     
-    command_time_exists = False
-    command_date_exists = False
     event_date = None
     event_time = None
+    event_length = None
+    command_time_exists = False  
+    command_date_exists = False
 
     for ent in doc.ents:
         if ent.label_ == "TIME":
@@ -81,25 +80,44 @@ def gather_info():
 
     if not command_time_exists:
         event_time = get_time_from_user()
-        command_time_exists = True
     if not command_date_exists:
         event_date = get_date_from_user()
-        command_date_exists = True
+
+    start_dt = parse_event_datetime(event_date, event_time)
+    if start_dt is None:
+        print("Error parsing date and time.")
+        return None
 
     event_name = input("Description of your event: ")
-    
-    parsed_datetime = parse_event_datetime(event_date, event_time)
-    if parsed_datetime is None:
-        print("There was an error parsing the date and time.")
-    else:
-        print(f"You have successfully scheduled '{event_name}' on {event_date} at {event_time}")
+    check_exit(event_name)
+
+    while True:
+        event_length_str = input("How long is your event? (Enter in minutes): ")
+        check_exit(event_length_str)
+        try:
+            event_length = float(event_length_str)
+            if event_length <= 0:
+                print("Invalid Event Length. Must be positive.")
+                continue
+            break
+        except ValueError:
+            print("Please enter a valid number for the duration.")
+
+    end_dt = start_dt + dt.timedelta(minutes=event_length)
+    print(f"You have successfully scheduled '{event_name}' on {event_date} at {event_time} for {event_length} minutes.")
 
     return {
-        "date": event_date,
-        "time": event_time,
-        "iso_datetime": parsed_datetime,
-        "description": event_name,
+        'summary': event_name,
+        'start': start_dt,
+        'end': end_dt
     }
+
+if __name__ == '__main__':
+    event_details = gather_info()
+    if event_details:
+        print("Parsed event details:", event_details)
+    else:
+        print("Failed to gather event details.")
 
 if __name__ == '__main__':
     event_details = gather_info()
