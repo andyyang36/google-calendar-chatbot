@@ -118,7 +118,3 @@ if __name__ == '__main__':
         print("Parsed event details:", event_details)
     else:
         print("Failed to gather event details.")
-
-if __name__ == '__main__':
-    event_details = gather_info()
-    print("Parsed event details:", event_details)
