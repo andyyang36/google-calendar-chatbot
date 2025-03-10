@@ -1,23 +1,40 @@
-import os.path  #checks for file existence
-import datetime as dt #date time
+import os.path
+import datetime as dt
 import add
+import remove
 
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
-from google.auth.transport.requests import Request #purpose is to get new login
-from google.oauth2.credentials import Credentials #oauth credentials to communicate between google api and here
-from google_auth_oauthlib.flow import InstalledAppFlow #key that allows program to use your google account
-from googleapiclient.discovery import build #allows you to access google calendar so you can read,add, update events
-from googleapiclient.errors import HttpError #safety net, lets your program know the mistake instead of crashing
+SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
-SCOPES = ["https://www.googleapis.com/auth/calendar"] #scope is the level of permission being requested
+def display_upcoming_events(service):
+    now = dt.datetime.utcnow().isoformat() + "Z"
+    events_result = service.events().list(
+        calendarId="primary",
+        timeMin=now,
+        maxResults=5,
+        singleEvents=True,
+        orderBy="startTime"
+    ).execute()
+    events = events_result.get('items', [])
+    if not events:
+        print("No upcoming events found.")
+    else:
+        print("Upcoming 5 events:")
+        for idx, event in enumerate(events):
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            summary = event.get('summary', 'No Title')
+            print(f"{idx+1}. {start} - {summary} (ID: {event['id']})")
 
 def main():
-    creds = None #initializes it as none to start
-
-    if os.path.exists("token.json"): #checks curr directory for token.json
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES) 
-
-    if not creds or not creds.valid: 
+    creds = None
+    if os.path.exists("token.json"):
+        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
@@ -25,34 +42,56 @@ def main():
             creds = flow.run_local_server(port=0)
         with open("token.json", "w") as token:
             token.write(creds.to_json())
-
+    service = build("calendar", "v3", credentials=creds)
+    
     while True:
         print("Actions:")
         print("1. Add an event to my calendar")
-        print("2. Remove an event on my calender")
-        print("3. Update an event on my calender")
+        print("2. Remove an event from my calendar")
+        print("3. Update an event on my calendar")
         print("4. Exit")
-        user_action = input("What would you like to do?: ")
+        user_action = input("What would you like to do?: ").strip()
+        
         if user_action == "1":
             try:
-                service = build("calendar", "v3", credentials=creds)
-                now = dt.datetime.now().isoformat() + "Z"
                 event_details = add.gather_info()
                 if event_details is None:
-                    print("Invalid")
-                    return
+                    print("Invalid event details provided.")
+                    continue
                 else:
                     event_dict = {
                         'summary': event_details['summary'],
-                        'start': {'dateTime': event_details['start'].isoformat(), 'timeZone':"America/New_York"},
+                        'start': {'dateTime': event_details['start'].isoformat(), 'timeZone': "America/New_York"},
                         'end': {'dateTime': event_details['end'].isoformat(), 'timeZone': "America/New_York"}
                     }
                 created_event = service.events().insert(calendarId="primary", body=event_dict).execute()
+                print("Event created successfully.")
             except HttpError as error:
-                print("An error occurred: ", error)
-        if user_action =="5":
-                return
+                print("An error occurred while adding the event:", error)
         
+        elif user_action == "2":
+            try:
+                display_upcoming_events(service)
+                event_id = input("Enter the event ID you want to remove: ").strip()
+                if not event_id:
+                    print("No event ID provided.")
+                    continue
+                if remove.remove_event(service, event_id):
+                    print("Event removed successfully.")
+                else:
+                    print("Failed to remove event.")
+            except HttpError as error:
+                print("An error occurred while removing the event:", error)
+        
+        elif user_action == "3":
+            print("Update event functionality is not yet implemented.")
+        
+        elif user_action == "4":
+            print("Exiting...")
+            return
+        
+        else:
+            print("Invalid option. Please choose a valid action.")
 
 if __name__ == '__main__':
     main()
