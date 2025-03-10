@@ -25,32 +25,35 @@ def main():
             creds = flow.run_local_server(port=0)
         with open("token.json", "w") as token:
             token.write(creds.to_json())
-    print("Actions:")
-    print("1. Add a event to my calendar")
-    user_action = input("What would you like to do?: ")
-    if user_action == "1":
-        try:
-            service = build("calendar", "v3", credentials=creds)
-            now = dt.datetime.now().isoformat() + "Z"
-            event_details = add.gather_info()
-            if event_details is None:
-                print("Invalid")
+
+    while True:
+        print("Actions:")
+        print("1. Add an event to my calendar")
+        print("2. Remove an event on my calender")
+        print("3. Update an event on my calender")
+        print("4. Exit")
+        user_action = input("What would you like to do?: ")
+        if user_action == "1":
+            try:
+                service = build("calendar", "v3", credentials=creds)
+                now = dt.datetime.now().isoformat() + "Z"
+                event_details = add.gather_info()
+                if event_details is None:
+                    print("Invalid")
+                    return
+                else:
+                    event_dict = {
+                        'summary': event_details['summary'],
+                        'start': {'dateTime': event_details['start'].isoformat(), 'timeZone':"America/New_York"},
+                        'end': {'dateTime': event_details['end'].isoformat(), 'timeZone': "America/New_York"}
+                    }
+                created_event = service.events().insert(calendarId="primary", body=event_dict).execute()
+            except HttpError as error:
+                print("An error occurred: ", error)
+        if user_action =="5":
                 return
-            else:
-                event_dict = {
-                    'summary': event_details['summary'],
-                    'start': {'dateTime': event_details['start'].isoformat(), 'timeZone':"America/New_York"},
-                    'end': {'dateTime': event_details['end'].isoformat(), 'timeZone': "America/New_York"}
-                }
-            created_event = service.events().insert(calendarId="primary",body=event_dict).execute()
-            created_event = service.events().insert(calendarId="primary", body=event_dict).execute()
-            print("Created Event:", created_event)
-
-
-        except HttpError as error:
-            print("An error occurred: ", error)
-        
         
 
 if __name__ == '__main__':
     main()
+
