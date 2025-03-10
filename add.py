@@ -86,10 +86,12 @@ def gather_info():
     if not command_date_exists:
         event_date = get_date_from_user()
 
+
     start_dt = parse_event_datetime(event_date, event_time)
-    if start_dt is None:
-        print("Error parsing date and time.")
-        return None
+    while start_dt is None:
+        event_date = input("Enter a date: ")
+        start_dt = parse_event_datetime(event_date, event_time)
+        print("Error parsing date and time, try again")
 
     event_name = text.replace(event_date, "").replace(event_time, "").replace("on","").replace("at","").strip()
     event_name = re.sub(r"\b\d{4}\b", "", event_name).strip()
