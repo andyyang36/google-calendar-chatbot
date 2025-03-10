@@ -2,6 +2,8 @@ import spacy
 import sys
 from dateutil import parser, tz
 import datetime as dt
+import re
+
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -89,7 +91,8 @@ def gather_info():
         print("Error parsing date and time.")
         return None
 
-    event_name = " ".join([token.text for token in doc if token.ent_type_ not in ("TIME", "DATE")])
+    event_name = text.replace(event_date, "").replace(event_time, "").replace("on","").replace("at","").strip()
+    event_name = re.sub(r"\b\d{4}\b", "", event_name).strip()
 
     while True:
         event_length_str = input("How long is your event? (Enter in minutes): ")
@@ -113,10 +116,3 @@ def gather_info():
         'start': start_dt,
         'end': end_dt
     }
-
-if __name__ == '__main__':
-    event_details = gather_info()
-    if event_details:
-        print("Parsed event details:", event_details)
-    else:
-        print("Failed to gather event details.")
