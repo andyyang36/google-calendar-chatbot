@@ -11,14 +11,14 @@ My goal is to enable users to schedule events through conversational commands—
 The current implementation features secure OAuth 2.0 authentication, robust integration with the Google Calendar API, setting the stage for further expansion into a full-featured calendar management chatbot.
 
 Examples of Usage:  
-Adding item to Calendar:
+
+Adding item to Calendar:  
 <img width="668" alt="image" src="https://github.com/user-attachments/assets/40f64c60-c658-41b3-8964-b00d8a8c29a8" />
-Removing item from Calendar:
+
+Removing item from Calendar:  
 <img width="423" alt="image" src="https://github.com/user-attachments/assets/b0703d75-2a0b-40b9-a2de-1bca2b4fcb0b" />
-Displaying Upcoming Events:
+
+Displaying Upcoming Events:  
 <img width="286" alt="image" src="https://github.com/user-attachments/assets/4bd40f20-720e-4637-a3ff-d8af957fac40" />
-
-
-
 
 
