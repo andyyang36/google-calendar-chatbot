@@ -56,7 +56,7 @@ requirements.txt - This file lists the Python packages required for the google-c
 ## Installation
 ---
 1. Clone the Repository
-git clone https://github.com/yourusername/google-calendar-chatbot.git
+git clone https://github.com/andyyang36/google-calendar-chatbot.git
 
 2. Change into the Project Directory
 cd google-calendar-chatbot
