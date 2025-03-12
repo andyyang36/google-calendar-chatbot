@@ -14,8 +14,8 @@ The current implementation features spaCy natural language detection, secure OAu
 
 ## Examples of Usage:  
 ---
-Adding item to Calendar:  
-<img width="668" alt="image" src="https://github.com/user-attachments/assets/40f64c60-c658-41b3-8964-b00d8a8c29a8" />
+Adding item to Calendar with NLP detection:  
+<img width="699" alt="image" src="https://github.com/user-attachments/assets/3769800b-cf8a-4b3b-9b39-ee6e1af74bf2" />
 
 Removing item from Calendar:  
 <img width="423" alt="image" src="https://github.com/user-attachments/assets/b0703d75-2a0b-40b9-a2de-1bca2b4fcb0b" />
